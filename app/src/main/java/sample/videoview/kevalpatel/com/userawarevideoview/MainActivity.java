@@ -4,13 +4,12 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.media.Image;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.MediaController;
@@ -38,7 +37,19 @@ public class MainActivity extends AppCompatActivity implements UserAwarenessList
 
         MediaController mediaController = new MediaController(this);
         mediaController.setAnchorView(mVideoView);
-        mediaController.setMediaPlayer(mVideoView);
+        mediaController.setPrevNextListeners(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mVideoView.stopPlayback();
+                mVideoView.start();
+            }
+        }, new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mVideoView.stopPlayback();
+                mVideoView.start();
+            }
+        });
 
         mVideoView.setMediaController(mediaController);
         mVideoView.start();
