@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.MediaController;
 
+import com.kevalpatel.userawarevieoview.Errors;
 import com.kevalpatel.userawarevieoview.UserAwareVideoView;
 import com.kevalpatel.userawarevieoview.UserAwarenessListener;
 
@@ -28,13 +29,16 @@ public class MainActivity extends AppCompatActivity implements UserAwarenessList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //set the is tracking indicator
         mTrackingStatusIv = (ImageView) findViewById(R.id.eye_tracking);
         mTrackingStatusIv.setVisibility(View.GONE);
 
+        //set user aware video view
         mVideoView = (UserAwareVideoView) findViewById(R.id.video_view);
         mVideoView.setUserAwarenessListener(this);
         mVideoView.setVideoURI(Uri.parse("http://clips.vorwaerts-gmbh.de/VfE_html5.mp4"));
 
+        //attach tge media controller
         MediaController mediaController = new MediaController(this);
         mediaController.setAnchorView(mVideoView);
         mediaController.setPrevNextListeners(new View.OnClickListener() {
@@ -52,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements UserAwarenessList
         });
 
         mVideoView.setMediaController(mediaController);
-        mVideoView.start();
+        mVideoView.start(); //Start video playing. This will start the user eye tracking too.
     }
 
     /**
@@ -108,34 +112,56 @@ public class MainActivity extends AppCompatActivity implements UserAwarenessList
                 .show();
     }
 
+    /**
+     * This indicates that some error occurred while eye detection. This provides error code that are
+     * defined for the particular situations.
+     *
+     * @see Errors
+     */
     @Override
-    public void onErrorOccurred() {
-        Snackbar.make(findViewById(R.id.activity_main), "Error occurred while tracking your eyes. No worries video will keep playing.",
-                Snackbar.LENGTH_INDEFINITE)
-                .setAction(android.R.string.ok, null)
-                .show();
+    public void onErrorOccurred(int errorCode) {
+
+        switch (errorCode) {
+            case Errors.UNDEFINED:
+                Snackbar.make(findViewById(R.id.activity_main), "Error occurred while tracking your eyes. No worries video will keep playing.",
+                        Snackbar.LENGTH_INDEFINITE)
+                        .setAction(android.R.string.ok, null)
+                        .show();
+                break;
+            case Errors.FRONT_CAMERA_NOT_AVAILABLE:
+                Snackbar.make(findViewById(R.id.activity_main), "Device does not have front camera. No worries video will keep playing.",
+                        Snackbar.LENGTH_INDEFINITE)
+                        .setAction(android.R.string.ok, null)
+                        .show();
+                break;
+            case Errors.CAMERA_PERMISSION_NOT_AVAILABLE:
+                //This indicates that camera permission is not available.
+                //Ask for the runtime camera permission.
+                requestCameraPermission();
+                break;
+            case Errors.LOW_LIGHT:
+                //This indicates that there is dark out side. We cannot detect user's face.
+                Snackbar.make(findViewById(R.id.activity_main), "There is not enough light to detect your eyes. No worries video will keep playing.",
+                        Snackbar.LENGTH_INDEFINITE)
+                        .setAction(android.R.string.ok, null)
+                        .show();
+                break;
+        }
     }
 
-    @Override
-    public void omLowLight() {
-        Snackbar.make(findViewById(R.id.activity_main), "There is not enough light to detect your eyes. No worries video will keep playing.",
-                Snackbar.LENGTH_INDEFINITE)
-                .setAction(android.R.string.ok, null)
-                .show();
-    }
-
+    /**
+     * Whenever the eye tracking starts this method will call.
+     */
     @Override
     public void onEyeTrackingStarted() {
         mTrackingStatusIv.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Whenever the eye tracking stops this method will called.
+     */
     @Override
     public void onEyeTrackingStop() {
         mTrackingStatusIv.setVisibility(View.GONE);
-    }
-
-    @Override
-    public void onCameraPermissionNotAvailable() {
-        requestCameraPermission();
     }
 }

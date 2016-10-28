@@ -15,6 +15,7 @@
  */
 package com.kevalpatel.userawarevieoview;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
@@ -27,6 +28,16 @@ import com.google.android.gms.vision.CameraSource;
 
 import java.io.IOException;
 
+/**
+ * Created by Keval on 28-Oct-16.
+ * This view will display the fake camera preview the to layout. As the android camera cnnot work without camera preview
+ * this will create a fake preview surface and attach to the camera. This view is added to the root layout of the activity
+ * view and having size 1px * 1px. That is almost invisible.
+ * <p>
+ * See {@link UserAwareVideoView#addPreView(Activity)} to understand how the view is added.
+ *
+ * @author {@link 'https://github.com/kevalpatel2106'}
+ */
 class CameraSourcePreview extends ViewGroup {
     private static final String TAG = "CameraSourcePreview";
 
@@ -137,12 +148,12 @@ class CameraSourcePreview extends ViewGroup {
 
         // Computes height and width for potentially doing fit width.
         int childWidth = layoutWidth;
-        int childHeight = (int)(((float) layoutWidth / (float) width) * height);
+        int childHeight = (int) (((float) layoutWidth / (float) width) * height);
 
         // If height is too tall using fit width, does fit height instead.
         if (childHeight > layoutHeight) {
             childHeight = layoutHeight;
-            childWidth = (int)(((float) layoutHeight / (float) height) * width);
+            childWidth = (int) (((float) layoutHeight / (float) height) * width);
         }
 
         for (int i = 0; i < getChildCount(); ++i) {

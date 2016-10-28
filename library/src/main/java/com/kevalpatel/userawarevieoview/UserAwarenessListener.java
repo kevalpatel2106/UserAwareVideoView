@@ -8,13 +8,9 @@ package com.kevalpatel.userawarevieoview;
 
 public interface UserAwarenessListener {
 
-    void onErrorOccurred();
-
-    void omLowLight();
+    void onErrorOccurred(int errorCode);
 
     void onEyeTrackingStarted();
 
     void onEyeTrackingStop();
-
-    void onCameraPermissionNotAvailable();
 }
