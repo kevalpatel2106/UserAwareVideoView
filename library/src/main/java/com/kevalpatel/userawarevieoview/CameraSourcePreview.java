@@ -15,10 +15,10 @@
  */
 package com.kevalpatel.userawarevieoview;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -38,6 +38,7 @@ import java.io.IOException;
  *
  * @author {@link 'https://github.com/kevalpatel2106'}
  */
+@SuppressLint("ViewConstructor")
 class CameraSourcePreview extends ViewGroup {
     private static final String TAG = "CameraSourcePreview";
 
@@ -46,21 +47,12 @@ class CameraSourcePreview extends ViewGroup {
     private boolean mStartRequested;
     private boolean mSurfaceAvailable;
     private CameraSource mCameraSource;
+    private UserAwareVideoView mUserAwareVideoView;
 
-    public CameraSourcePreview(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        mContext = context;
-        mStartRequested = false;
-        mSurfaceAvailable = false;
-
-        mSurfaceView = new SurfaceView(context);
-        mSurfaceView.getHolder().addCallback(new SurfaceCallback());
-        addView(mSurfaceView);
-    }
-
-    public CameraSourcePreview(Context context) {
+    CameraSourcePreview(Context context, UserAwareVideoView videoView) {
         super(context);
         mContext = context;
+        mUserAwareVideoView = videoView;
         mStartRequested = false;
         mSurfaceAvailable = false;
 
@@ -110,6 +102,7 @@ class CameraSourcePreview extends ViewGroup {
             try {
                 startIfReady();
             } catch (IOException e) {
+                mUserAwareVideoView.onErrorOccurred();
                 Log.e(TAG, "Could not start camera source.", e);
             }
         }
@@ -128,13 +121,6 @@ class CameraSourcePreview extends ViewGroup {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         int width = 1;
         int height = 1;
-//        if (mCameraSource != null) {
-//            Size size = mCameraSource.getPreviewSize();
-//            if (size != null) {
-//                width = size.getWidth();
-//                height = size.getHeight();
-//            }
-//        }
 
         // Swap width and height sizes when in portrait, since it will be rotated 90 degrees
         if (isPortraitMode()) {

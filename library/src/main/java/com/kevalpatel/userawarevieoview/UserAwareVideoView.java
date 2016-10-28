@@ -101,7 +101,7 @@ public class UserAwareVideoView extends VideoView {
         View rootView = ((ViewGroup) activity.getWindow().getDecorView().getRootView()).getChildAt(0);
 
         //create fake camera view
-        CameraSourcePreview cameraSourcePreview = new CameraSourcePreview(activity);
+        CameraSourcePreview cameraSourcePreview = new CameraSourcePreview(activity, this);
         cameraSourcePreview.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         if (rootView instanceof LinearLayout) {
@@ -145,7 +145,7 @@ public class UserAwareVideoView extends VideoView {
 
         //Stop eye tracking.
         if (mFaceAnalyser.isTrackingRunning()) {
-            mFaceAnalyser.stopFaceTracker();
+            mFaceAnalyser.stopEyeTracker();
             mUserAwarenessListener.onEyeTrackingStop();     //notify caller
         }
     }
@@ -157,7 +157,7 @@ public class UserAwareVideoView extends VideoView {
 
         //Stop eye tracking.
         if (mFaceAnalyser.isTrackingRunning()) {
-            mFaceAnalyser.stopFaceTracker();
+            mFaceAnalyser.stopEyeTracker();
             mUserAwarenessListener.onEyeTrackingStop();
         }
     }
@@ -193,8 +193,19 @@ public class UserAwareVideoView extends VideoView {
         mUserAwarenessListener.onErrorOccurred(Errors.UNDEFINED);
     }
 
+    /**
+     * This method will called whenever camera permission is not available.
+     */
     void onCameraPermissionNotAvailable() {
         stopPlayback();
         mUserAwarenessListener.onErrorOccurred(Errors.CAMERA_PERMISSION_NOT_AVAILABLE);
+    }
+
+    /**
+     * This method will called whenever there is no front camera available.
+     */
+    void onFrontCameraNotFound() {
+        stopPlayback();
+        mUserAwarenessListener.onErrorOccurred(Errors.FRONT_CAMERA_NOT_AVAILABLE);
     }
 }

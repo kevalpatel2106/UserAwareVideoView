@@ -3,10 +3,8 @@ package com.kevalpatel.userawarevieoview;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.PowerManager;
-import android.provider.Settings;
+import android.hardware.Camera;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
@@ -22,6 +20,8 @@ import java.io.IOException;
 
 /**
  * Created by Keval on 27-Oct-16.
+ * This class is responsible for analysing and detecting the eyes and face from the frame of the
+ * front camera using mobile vision library.
  *
  * @author {@link 'https://github.com/kevalpatel2106'}
  */
@@ -29,14 +29,12 @@ import java.io.IOException;
 class FaceAnalyser {
     private static final int RC_HANDLE_GMS = 4525;
 
-    private static final String TAG = "face";
-    private final UserAwareVideoView mUserAwareVideoView;
-    private FaceDetector mDetector;
+    private final UserAwareVideoView mUserAwareVideoView;       //Instance of the video view
+    private FaceDetector mDetector;                             //Face detector instance
     private CameraSource mCameraSource;
     private CameraSourcePreview mPreview;
-    private PowerManager.WakeLock mWakeLock;
 
-    private boolean isTrackingRunning = false;
+    private boolean isTrackingRunning = false;                  //Bool to indicate is eye tracking is currently running or not?
     private Activity mActivity;
 
     /**
@@ -57,17 +55,12 @@ class FaceAnalyser {
         } else {
             throw new RuntimeException("Cannot start without camera source preview.");
         }
-
-        final PowerManager pm = (PowerManager) mActivity.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "FaceTacker Wakelock");
     }
 
-    void onResumeCalled() {
-        long screenOnTiming = Settings.System.getLong(mActivity.getContentResolver(),
-                Settings.System.SCREEN_OFF_TIMEOUT, 0);
-    }
-
-    void stopFaceTracker() {
+    /**
+     * Stop eye tracking.
+     */
+    void stopEyeTracker() {
         isTrackingRunning = false;
 
         if (mDetector != null) mDetector.release();
@@ -75,6 +68,9 @@ class FaceAnalyser {
     }
 
 
+    /**
+     * Create face decoder and camera source.
+     */
     private void creteCameraTracker() {
         mDetector = new FaceDetector.Builder(mActivity)
                 .setTrackingEnabled(false)
@@ -94,13 +90,19 @@ class FaceAnalyser {
                 .build();
     }
 
-
+    /**
+     * Start eye tracking.
+     */
     void startFaceTracker() {
+        //check if the device has front camera.
+        if (isFrontCameraAvailable()) mUserAwareVideoView.onFrontCameraNotFound();
+
         //check for the camera permission
         if (ActivityCompat.checkSelfPermission(mActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             mUserAwareVideoView.onCameraPermissionNotAvailable();
         }
 
+        //create camera source
         creteCameraTracker();
 
         // check that the device has play services available.
@@ -115,7 +117,7 @@ class FaceAnalyser {
             try {
                 mPreview.start(mCameraSource);
             } catch (IOException e) {
-                Log.e(TAG, "Unable to start camera source.", e);
+                mUserAwareVideoView.onErrorOccurred();
                 mCameraSource.release();
                 mCameraSource = null;
             }
@@ -124,6 +126,11 @@ class FaceAnalyser {
         isTrackingRunning = true;
     }
 
+    /**
+     * Boolean to indicate if the tracking is running or not?
+     *
+     * @return true if eye tracking is running.
+     */
     boolean isTrackingRunning() {
         return isTrackingRunning;
     }
@@ -149,33 +156,25 @@ class FaceAnalyser {
         private GraphicFaceTracker() {
         }
 
-        /**
-         * Start tracking the detected face instance within the face overlay.
-         */
+
         @Override
         public void onNewItem(int faceId, Face item) {
-            Log.d(TAG, "onNewItem" + faceId);
         }
 
         /**
-         * Update the position/characteristics of the face within the overlay.
+         * When new frame analysed.
          */
         @Override
         public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
-            Log.d(TAG, "onUpdate" + face.getIsLeftEyeOpenProbability());
+            Log.d("FaceTracker", "onUpdate" + face.getIsLeftEyeOpenProbability());
 
+            //if left and right eyes are open. (Probability more than 10%)
             if (face.getIsLeftEyeOpenProbability() > 0.10 && face.getIsRightEyeOpenProbability() > 0.10) {
                 isEyesClosedCount = 0;
-
-                if (!mWakeLock.isHeld()) mWakeLock.acquire();
                 mUserAwareVideoView.onUserAttentionAvailable();
             } else {
                 isEyesClosedCount++;
-
-                if (isEyesClosedCount > 2) {
-                    if (mWakeLock.isHeld()) mWakeLock.release();
-                    mUserAwareVideoView.onUserAttentionGone();
-                }
+                if (isEyesClosedCount > 2) mUserAwareVideoView.onUserAttentionGone();
             }
         }
 
@@ -186,7 +185,6 @@ class FaceAnalyser {
          */
         @Override
         public void onMissing(FaceDetector.Detections<Face> detectionResults) {
-            Log.d(TAG, "onMissing");
         }
 
         /**
@@ -195,8 +193,18 @@ class FaceAnalyser {
          */
         @Override
         public void onDone() {
-            if (mWakeLock.isHeld()) mWakeLock.release();
             mUserAwareVideoView.onUserAttentionGone();
         }
     }
+
+    /**
+     * Check if the device has front camera or not?
+     *
+     * @return true if the device has front camera.
+     */
+    private boolean isFrontCameraAvailable() {
+        int numCameras = Camera.getNumberOfCameras();
+        return numCameras > 0 && mActivity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
+    }
+
 }
