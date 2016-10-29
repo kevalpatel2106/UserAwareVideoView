@@ -95,7 +95,7 @@ class FaceAnalyser {
      */
     void startFaceTracker() {
         //check if the device has front camera.
-        if (isFrontCameraAvailable()) {
+        if (!isFrontCameraAvailable()) {
             mUserAwareVideoView.onFrontCameraNotFound();
             return;
         }

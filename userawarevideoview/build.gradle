@@ -28,7 +28,7 @@ dependencies {
 }
 
 //#################################### Bintray ####################################//
-version = "1.0"     // This is the library version used when deploying the artifact
+version = "1.0.1"     // This is the library version used when deploying the artifact
 
 def siteUrl = 'https://github.com/kevalpatel2106/UserAwareVideoView'        // Homepage URL of the library
 def gitUrl = 'https://github.com/kevalpatel2106/UserAwareVideoView.git'      // Git repository URL
