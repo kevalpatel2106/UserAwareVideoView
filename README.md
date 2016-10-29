@@ -1,7 +1,10 @@
 # UserAwareVideoView
-======================
+----------------------
 
 [ ![Download](https://api.bintray.com/packages/kevalpatel2106/maven/user-aware-videoview/images/download.svg) ](https://bintray.com/kevalpatel2106/maven/user-aware-videoview/_latestVersion) [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/kevalpatel2106/UserAwareVideoView)
+
+##Featured in:
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-UserAwareVideoView-green.svg?style=true)](https://android-arsenal.com/details/1/4569)
 
 UserAwareVideoView is a customizable VideoView that smartly play and pause the video based on your user is looking at the video or not. This uses Play Services Mobile Vision APIs to detect user's eyes. If the user is not looking at the screen than this will automatically pause the video, so your user does not miss any part of the video.
 
@@ -11,7 +14,7 @@ Add these lines to your `build.gradle` file to start integration.
 
 ```
 dependency{
-    compile 'com.kevalpatel2106:userawarevideoview:1.0'
+    compile 'com.kevalpatel2106:userawarevideoview:1.0.1'
 }
 ```
 
@@ -73,10 +76,10 @@ mVideoView.setUserAwarenessListener(new UserAwarenessListener() {
 
 That's it. UserAwareVideoView is ready to use.
 
-#Demo
+##Demo
 You can download the sample apk from [here](/apk/sample.apk).
 
-#Contribute:
+##Contribute:
 ####Simple 3 step to contribute into this repo:
 
 1. Fork the project. 
