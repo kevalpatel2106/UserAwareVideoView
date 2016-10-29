@@ -73,6 +73,9 @@ mVideoView.setUserAwarenessListener(new UserAwarenessListener() {
 
 That's it. UserAwareVideoView is ready to use.
 
+#Demo
+You can download the sample apk from [here](/apk/sample.apk).
+
 #Contribute:
 ####Simple 3 step to contribute into this repo:
 
