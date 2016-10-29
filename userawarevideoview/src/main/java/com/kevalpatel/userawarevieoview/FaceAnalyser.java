@@ -121,6 +121,7 @@ class FaceAnalyser {
             try {
                 mPreview.start(mCameraSource);
             } catch (IOException e) {
+                Log.d("startTracking",e.getMessage());
                 mUserAwareVideoView.onErrorOccurred();
                 mCameraSource.release();
                 mCameraSource = null;

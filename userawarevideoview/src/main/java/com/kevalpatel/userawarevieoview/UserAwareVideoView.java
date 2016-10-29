@@ -102,7 +102,8 @@ public class UserAwareVideoView extends VideoView {
 
         //create fake camera view
         CameraSourcePreview cameraSourcePreview = new CameraSourcePreview(activity, this);
-        cameraSourcePreview.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        cameraSourcePreview.setLayoutParams(new ViewGroup
+                .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         if (rootView instanceof LinearLayout) {
             LinearLayout linearLayout = (LinearLayout) rootView;
@@ -197,7 +198,14 @@ public class UserAwareVideoView extends VideoView {
      * This method will called whenever camera permission is not available.
      */
     void onCameraPermissionNotAvailable() {
-        stopPlayback();
+        super.stopPlayback();
+
+        //Stop eye tracking.
+        if (mFaceAnalyser.isTrackingRunning()) {
+            mFaceAnalyser.stopEyeTracker();
+            mUserAwarenessListener.onEyeTrackingStop();     //notify caller
+        }
+
         mUserAwarenessListener.onErrorOccurred(Errors.CAMERA_PERMISSION_NOT_AVAILABLE);
     }
 

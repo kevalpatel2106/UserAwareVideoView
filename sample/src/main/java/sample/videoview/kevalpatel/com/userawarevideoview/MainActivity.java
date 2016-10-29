@@ -1,7 +1,6 @@
 package sample.videoview.kevalpatel.com.userawarevideoview;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -56,18 +55,14 @@ public class MainActivity extends AppCompatActivity implements UserAwarenessList
         });
 
         mVideoView.setMediaController(mediaController);
-        mVideoView.start(); //Start video playing. This will start the user eye tracking too.
-    }
 
-    /**
-     * Handles the requesting of the camera permission.  This includes
-     * showing a "Snackbar" message of why the permission is needed then
-     * sending the request.
-     */
-    private void requestCameraPermission() {
-        final String[] permissions = new String[]{Manifest.permission.CAMERA};
-
-        ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED){
+            mVideoView.start(); //Start video playing. This will start the user eye tracking too.
+        }else {
+            final String[] permissions = new String[]{Manifest.permission.CAMERA};
+            ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM);
+        }
     }
 
     @Override
@@ -117,7 +112,8 @@ public class MainActivity extends AppCompatActivity implements UserAwarenessList
             case Errors.CAMERA_PERMISSION_NOT_AVAILABLE:
                 //This indicates that camera permission is not available.
                 //Ask for the runtime camera permission.
-                requestCameraPermission();
+                final String[] permissions = new String[]{Manifest.permission.CAMERA};
+                ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM);
                 break;
             case Errors.LOW_LIGHT:
                 //This indicates that there is dark out side. We cannot detect user's face.
