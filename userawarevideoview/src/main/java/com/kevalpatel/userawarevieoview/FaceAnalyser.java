@@ -95,11 +95,15 @@ class FaceAnalyser {
      */
     void startFaceTracker() {
         //check if the device has front camera.
-        if (isFrontCameraAvailable()) mUserAwareVideoView.onFrontCameraNotFound();
+        if (isFrontCameraAvailable()) {
+            mUserAwareVideoView.onFrontCameraNotFound();
+            return;
+        }
 
         //check for the camera permission
         if (ActivityCompat.checkSelfPermission(mActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             mUserAwareVideoView.onCameraPermissionNotAvailable();
+            return;
         }
 
         //create camera source
