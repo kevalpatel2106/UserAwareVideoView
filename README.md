@@ -1,7 +1,7 @@
 # UserAwareVideoView
 ----------------------
 
-[ ![Download](https://api.bintray.com/packages/kevalpatel2106/maven/user-aware-videoview/images/download.svg) ](https://bintray.com/kevalpatel2106/maven/user-aware-videoview/_latestVersion) [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/kevalpatel2106/UserAwareVideoView)
+[ ![Download](https://api.bintray.com/packages/kevalpatel2106/maven/user-aware-videoview/images/download.svg) ](https://bintray.com/kevalpatel2106/maven/user-aware-videoview/_latestVersion) [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/kevalpatel2106/UserAwareVideoView) [![API](https://img.shields.io/badge/API-15%2B-orange.svg?style=flat)](https://android-arsenal.com/api?level=15)
 
 ##Featured in:
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-UserAwareVideoView-green.svg?style=true)](https://android-arsenal.com/details/1/4569)
