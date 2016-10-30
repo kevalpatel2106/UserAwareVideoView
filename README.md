@@ -6,6 +6,7 @@
 ##Featured in:
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-UserAwareVideoView-green.svg?style=true)](https://android-arsenal.com/details/1/4569)
 
+##What is this library for?
 UserAwareVideoView is a customizable VideoView that smartly play and pause the video based on your user is looking at the video or not. This uses Play Services Mobile Vision APIs to detect user's eyes. If the user is not looking at the screen than this will automatically pause the video, so your user does not miss any part of the video.
 
 ##How to use this library???
