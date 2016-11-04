@@ -1,13 +1,11 @@
 package sample.videoview.kevalpatel.com.userawarevideoview;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
@@ -56,13 +54,10 @@ public class MainActivity extends AppCompatActivity implements UserAwarenessList
 
         mVideoView.setMediaController(mediaController);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                == PackageManager.PERMISSION_GRANTED){
-            mVideoView.start(); //Start video playing. This will start the user eye tracking too.
-        }else {
-            final String[] permissions = new String[]{Manifest.permission.CAMERA};
-            ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM);
-        }
+        //Start video playing. This will start the user eye tracking too.
+        //Do not care about permissions. Permissions will check internally.
+        //Just handle errors.
+        mVideoView.start();
     }
 
     @Override
@@ -74,16 +69,6 @@ public class MainActivity extends AppCompatActivity implements UserAwarenessList
 
         if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             mVideoView.start();
-        } else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.app_name)
-                    .setMessage(R.string.no_camera_permission)
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            finish();
-                        }
-                    })
-                    .show();
         }
     }
 

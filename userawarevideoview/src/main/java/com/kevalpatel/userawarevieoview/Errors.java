@@ -20,7 +20,7 @@ public class Errors {
 
     /**
      * This indicates that camera permission is not available.
-     * Ask for the camera permission at runtime.
+     * Ask for the camera permission at runtime. This will stop the video playback.
      */
     public static final int CAMERA_PERMISSION_NOT_AVAILABLE = 1;
 
@@ -33,7 +33,7 @@ public class Errors {
 
     /**
      * This error code indicates that there is low light environment around. So eye detector cannot
-     * detect user face/eyes. .If this error occurs,
+     * detect user face/eyes. If this error occurs,
      * eye tracking will stop but the video will continue to play. User/Developer can play/pause/stop
      * video manually.
      */

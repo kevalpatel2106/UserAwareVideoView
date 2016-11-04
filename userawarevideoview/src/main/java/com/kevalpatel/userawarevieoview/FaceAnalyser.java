@@ -81,7 +81,10 @@ class FaceAnalyser {
                 new MultiProcessor.Builder<>(new GraphicFaceTrackerFactory())
                         .build());
 
-        if (!mDetector.isOperational()) mUserAwareVideoView.onErrorOccurred();
+        if (!mDetector.isOperational()) {
+            mUserAwareVideoView.onErrorOccurred();
+            Log.e("Start Tracking", "Face tracker is not operational.");
+        }
 
         mCameraSource = new CameraSource.Builder(mActivity, mDetector)
                 .setRequestedPreviewSize(640, 480)
@@ -97,17 +100,16 @@ class FaceAnalyser {
         //check if the device has front camera.
         if (!isFrontCameraAvailable()) {
             mUserAwareVideoView.onFrontCameraNotFound();
+            Log.e("Start Tracking", "Front camera not found.");
             return;
         }
 
         //check for the camera permission
         if (ActivityCompat.checkSelfPermission(mActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             mUserAwareVideoView.onCameraPermissionNotAvailable();
+            Log.e("Start Tracking", "Camera permission not found.");
             return;
         }
-
-        //create camera source
-        creteCameraTracker();
 
         // check that the device has play services available.
         int statusCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(
@@ -115,7 +117,14 @@ class FaceAnalyser {
         if (statusCode != ConnectionResult.SUCCESS) {
             Dialog dlg = GoogleApiAvailability.getInstance().getErrorDialog(mActivity, statusCode, RC_HANDLE_GMS);
             dlg.show();
+            Log.e("Start Tracking", "Google Play Service not found.");
+
+            mUserAwareVideoView.onErrorOccurred();
+            return;
         }
+
+        //create camera source
+        creteCameraTracker();
 
         if (mCameraSource != null) {
             try {
@@ -125,6 +134,8 @@ class FaceAnalyser {
                 mUserAwareVideoView.onErrorOccurred();
                 mCameraSource.release();
                 mCameraSource = null;
+
+                mUserAwareVideoView.onErrorOccurred();
             }
         }
 
@@ -164,6 +175,7 @@ class FaceAnalyser {
 
         @Override
         public void onNewItem(int faceId, Face item) {
+            Log.d("onNewItem","" + faceId);
         }
 
         /**
@@ -190,6 +202,7 @@ class FaceAnalyser {
          */
         @Override
         public void onMissing(FaceDetector.Detections<Face> detectionResults) {
+            Log.d("onMissing","" );
         }
 
         /**

@@ -32,6 +32,7 @@ public class UserAwareVideoView extends VideoView {
     private FaceAnalyser mFaceAnalyser;
     private int mPauseTime;     //Time when video paused last time.
     private UserAwarenessListener mUserAwarenessListener;   //Callback to the parent activity.
+    private LightIntensityManager mLightIntensityManager;   //Measure surrounding light conditions.
 
 
     //====================== Constructors ======================//
@@ -74,8 +75,11 @@ public class UserAwareVideoView extends VideoView {
             throw new RuntimeException("Cannot initialize with other than Activity context.");
         }
 
-        //initialize
+        //initialize the eye tracking
         mFaceAnalyser = new FaceAnalyser(activity, this, addPreView(activity));
+
+        //Initialize the light sensor.
+        mLightIntensityManager = new LightIntensityManager(activity);
     }
 
     /**
@@ -129,26 +133,28 @@ public class UserAwareVideoView extends VideoView {
         return cameraSourcePreview;
     }
 
+    //This method is called externally by the user, never call it from SDK.
+    //Instead use super method to start video playing.
     @Override
     public void start() {
+        //start eye tracking if it is not running already
+        startEyeTracking();
+
         super.start();
 
-        //start eye tracking if it is not running already
-        if (!mFaceAnalyser.isTrackingRunning()) {
-            mFaceAnalyser.startFaceTracker();
-            mUserAwarenessListener.onEyeTrackingStarted();  //notify caller
-        }
+        //start light sensor
+        mLightIntensityManager.startLightMonitoring();
     }
 
     @Override
     public void stopPlayback() {
+        //Stop eye tracking.
+        stopEyeTracking();
+
         super.stopPlayback();
 
-        //Stop eye tracking.
-        if (mFaceAnalyser.isTrackingRunning()) {
-            mFaceAnalyser.stopEyeTracker();
-            mUserAwarenessListener.onEyeTrackingStop();     //notify caller
-        }
+        //stop light sensor
+        mLightIntensityManager.stopLightMonitoring();
     }
 
 
@@ -157,10 +163,10 @@ public class UserAwareVideoView extends VideoView {
         super.pause();
 
         //Stop eye tracking.
-        if (mFaceAnalyser.isTrackingRunning()) {
-            mFaceAnalyser.stopEyeTracker();
-            mUserAwarenessListener.onEyeTrackingStop();
-        }
+        stopEyeTracking();
+
+        //stop light sensor
+        mLightIntensityManager.stopLightMonitoring();
     }
 
     /**
@@ -168,12 +174,11 @@ public class UserAwareVideoView extends VideoView {
      * This will pause the video currently playing.
      */
     void onUserAttentionGone() {
-        if (isPlaying()) {
+        if (isPlaying()) {  //If video is playing pause it.
             mPauseTime = getCurrentPosition(); //mPauseTime is an int
             super.pause();
         }
     }
-
 
     /**
      * This method will called, whenever user is started looking at the display.
@@ -192,28 +197,82 @@ public class UserAwareVideoView extends VideoView {
      */
     void onErrorOccurred() {
         mUserAwarenessListener.onErrorOccurred(Errors.UNDEFINED);
+
+        //start light sensor because eye tracking is not running we don't need light sensor now
+        mLightIntensityManager.stopLightMonitoring();
     }
 
     /**
-     * This method will called whenever camera permission is not available.
+     * This method will called whenever camera permission is not available. If the camera permission
+     * is not available this will stop the video untill user provides the camera permission.
      */
     void onCameraPermissionNotAvailable() {
         super.stopPlayback();
 
         //Stop eye tracking.
-        if (mFaceAnalyser.isTrackingRunning()) {
-            mFaceAnalyser.stopEyeTracker();
-            mUserAwarenessListener.onEyeTrackingStop();     //notify caller
-        }
+        stopEyeTracking();
+
+        //start light sensor because eye tracking is not running we don't need light sensor now
+        mLightIntensityManager.stopLightMonitoring();
 
         mUserAwarenessListener.onErrorOccurred(Errors.CAMERA_PERMISSION_NOT_AVAILABLE);
     }
 
     /**
-     * This method will called whenever there is no front camera available.
+     * This method will called whenever there is no front camera available. In this case video
+     * playing will still continue only face tacking will stop.
      */
     void onFrontCameraNotFound() {
-        stopPlayback();
         mUserAwarenessListener.onErrorOccurred(Errors.FRONT_CAMERA_NOT_AVAILABLE);
+
+        //Stop eye tracking.
+        stopEyeTracking();
+
+        //start light sensor because eye tracking is not running we don't need light sensor now
+        mLightIntensityManager.stopLightMonitoring();
+    }
+
+    /**
+     * This method will called whenever there is not enough light to tack and detect user's eyes using
+     * front camera. This will stop the face tracking as the face tracking might be wrong. But, the video
+     * keeps playing. Light sensor is still on and is monitoring lighting conditions. If the light intensity
+     * is enough again than {@link #onEnoughLightAvailable()} will start eye tracker again.
+     */
+    void onLowLight() {
+        mUserAwarenessListener.onErrorOccurred(Errors.LOW_LIGHT);
+
+        //Stop eye tracking.
+        stopEyeTracking();
+    }
+
+    /**
+     * When there is enough light available after the low light condition this method will execute.
+     * This will start eye tracking again.
+     */
+    void onEnoughLightAvailable() {
+        //start eye tracking if it is not running already
+        startEyeTracking();
+    }
+
+    /**
+     * This method initialize the camera and start face tracking and eyes tracking using mobile
+     * vision api.
+     */
+    private void startEyeTracking() {
+        if (!mFaceAnalyser.isTrackingRunning()) {
+            mFaceAnalyser.startFaceTracker();
+            mUserAwarenessListener.onEyeTrackingStarted();  //notify caller
+        }
+    }
+
+    /**
+     * This method stops and release the camera and stop face tracking and eyes tracking.
+     */
+    private void stopEyeTracking() {
+        //Stop eye tracking.
+        if (mFaceAnalyser.isTrackingRunning()) {
+            mFaceAnalyser.stopEyeTracker();
+            mUserAwarenessListener.onEyeTrackingStop();
+        }
     }
 }
