@@ -17,7 +17,7 @@ Add these lines to your `build.gradle` file to start integration.
 
 ```
 dependency{
-    compile 'com.kevalpatel2106:userawarevideoview:1.0.1'
+    compile 'com.kevalpatel2106:userawarevideoview:1.0.2'
 }
 ```
 
