@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.github.kt3k.coveralls'
 
 android {
     compileSdkVersion 25
@@ -27,90 +27,106 @@ dependencies {
     compile 'com.google.android.gms:play-services-vision:9.8.0'
 }
 
+coveralls {
+    sourceDirs = files('library/src/main/java').flatten()
+    jacocoReportPath = "${buildDir}/reports/coverage/debug/report.xml"
+}
+
+tasks.coveralls {
+    dependsOn 'connectedAndroidTest'
+    onlyIf { System.env.'CI' }
+}
+
 //#################################### Bintray ####################################//
-version = "1.0.2"     // This is the library version used when deploying the artifact
+if (project.rootProject.file('local.properties').exists()) {
+    apply plugin: 'com.jfrog.bintray'
 
-def siteUrl = 'https://github.com/kevalpatel2106/UserAwareVideoView'        // Homepage URL of the library
-def gitUrl = 'https://github.com/kevalpatel2106/UserAwareVideoView.git'      // Git repository URL
+    version = "1.0.2"     // This is the library version used when deploying the artifact
 
-group = "com.kevalpatel2106"
+    def siteUrl = 'https://github.com/kevalpatel2106/UserAwareVideoView'
+    // Homepage URL of the library
+    def gitUrl = 'https://github.com/kevalpatel2106/UserAwareVideoView.git'
+    // Git repository URL
 
-install {
-    repositories.mavenInstaller {
-        // This generates POM.xml with proper parameters
-        pom {
-            project {
-                packaging 'aar'
+    group = "com.kevalpatel2106"
 
-                // Add your description here
-                name 'user-aware-videoview'
-                description = 'A custmized video view that will automatically pause video is user is not looking at device screen!!!!!'
-                url siteUrl
+    install {
+        repositories.mavenInstaller {
+            // This generates POM.xml with proper parameters
+            pom {
+                project {
+                    packaging 'aar'
 
-                // Set your license
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id 'kevalpatel2106'
-                        name 'Keval Patel'
-                        email 'kevalpatel2106@gmail.com'
-                    }
-                }
-                scm {
-                    connection gitUrl
-                    developerConnection gitUrl
+                    // Add your description here
+                    name 'user-aware-videoview'
+                    description = 'A custmized video view that will automatically pause video is user is not looking at device screen!!!!!'
                     url siteUrl
+
+                    // Set your license
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id 'kevalpatel2106'
+                            name 'Keval Patel'
+                            email 'kevalpatel2106@gmail.com'
+                        }
+                    }
+                    scm {
+                        connection gitUrl
+                        developerConnection gitUrl
+                        url siteUrl
+                    }
                 }
             }
         }
     }
-}
 
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-}
+    task sourcesJar(type: Jar) {
+        from android.sourceSets.main.java.srcDirs
+        classifier = 'sources'
+    }
 
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-}
+    task javadoc(type: Javadoc) {
+        source = android.sourceSets.main.java.srcDirs
+        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-artifacts {
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+    artifacts {
 //    archives javadocJar
-    archives sourcesJar
-}
+        archives sourcesJar
+    }
 
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
 // https://github.com/bintray/gradle-bintray-plugin
-bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apikey")
+    bintray {
+        user = properties.getProperty("bintray.user")
+        key = properties.getProperty("bintray.apikey")
 
-    configurations = ['archives']
-    pkg {
-        repo = "maven"
-        // it is the name that appears in bintray when logged
-        name = "user-aware-videoview"
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
-        licenses = ["Apache-2.0"]
-        publish = true
-        version {
-            gpg {
-                sign = false //Determines whether to GPG sign the files. The default is false
+        configurations = ['archives']
+        pkg {
+            repo = "maven"
+            // it is the name that appears in bintray when logged
+            name = "user-aware-videoview"
+            websiteUrl = siteUrl
+            vcsUrl = gitUrl
+            licenses = ["Apache-2.0"]
+            publish = true
+            version {
+                gpg {
+                    sign = false //Determines whether to GPG sign the files. The default is false
 //                passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'
+                }
             }
         }
     }
