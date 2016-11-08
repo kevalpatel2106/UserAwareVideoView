@@ -6,6 +6,11 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.0"
 
+    // This is important, it will run lint checks but won't abort build
+    lintOptions {
+        abortOnError false
+    }
+
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 25
