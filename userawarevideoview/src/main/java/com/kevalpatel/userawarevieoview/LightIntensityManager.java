@@ -1,10 +1,11 @@
 package com.kevalpatel.userawarevieoview;
 
-import android.content.Context;
+import android.app.Activity;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -17,13 +18,48 @@ import static android.content.Context.SENSOR_SERVICE;
  */
 
 class LightIntensityManager {
+    //Minimum light intensity required to operate the eye detection.
+    private static final float LIGHT_INTENSITY_THRESHOLD = 6F;
 
-    private final SensorManager sensorManager;
-    private final Sensor lightSensor;
+    private final UserAwareVideoView mActivity;
+
+    private final SensorManager mSensorManager;
+    private final Sensor mLightSensor;
+
+    private float mLastIntensity = 0f;
+    private CountDownTimer mCountDownTimer;
+
     private final SensorEventListener listener = new SensorEventListener() {
+
+        boolean isInLowLightCondition;
+
         @Override
         public void onSensorChanged(SensorEvent event) {
-            Log.d("light sensor", event.values[0] + "");
+            mLastIntensity = event.values[0];
+
+            if (mLastIntensity < LIGHT_INTENSITY_THRESHOLD && mCountDownTimer == null) {
+                mCountDownTimer = new CountDownTimer(5000, 5000) {
+                    @Override
+                    public void onTick(long l) {
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        if (mLastIntensity < LIGHT_INTENSITY_THRESHOLD) {
+                            mActivity.onLowLight();
+                            isInLowLightCondition = true;
+                        }
+
+                        mCountDownTimer = null;
+                    }
+                };
+                mCountDownTimer.start();
+            }else if (isInLowLightCondition){
+                mActivity.onEnoughLightAvailable();
+            }
+
+            Log.d("light sensor", mLastIntensity + "");
         }
 
         @Override
@@ -38,17 +74,22 @@ class LightIntensityManager {
      *
      * @param context instance of the caller.
      */
-    LightIntensityManager(@NonNull Context context) {
+    LightIntensityManager(@NonNull UserAwareVideoView context, Activity activity) {
+        mActivity = context;
+
         // Obtain references to the SensorManager and the Light Sensor
-        sensorManager = (SensorManager) context.getSystemService(SENSOR_SERVICE);
-        lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        mSensorManager = (SensorManager) activity.getSystemService(SENSOR_SERVICE);
+        mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
     }
 
     void startLightMonitoring() {
-        sensorManager.registerListener(listener, lightSensor, SensorManager.SENSOR_DELAY_UI);
+        mSensorManager.registerListener(listener, mLightSensor, SensorManager.SENSOR_DELAY_UI);
     }
 
     void stopLightMonitoring() {
-        sensorManager.unregisterListener(listener);
+        mSensorManager.unregisterListener(listener);
+
+        //stop the timer if running
+        if (mCountDownTimer != null) mCountDownTimer.cancel();
     }
 }

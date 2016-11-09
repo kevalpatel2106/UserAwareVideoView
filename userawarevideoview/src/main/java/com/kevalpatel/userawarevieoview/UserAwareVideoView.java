@@ -79,7 +79,7 @@ public class UserAwareVideoView extends VideoView {
         mFaceAnalyser = new FaceAnalyser(activity, this, addPreView(activity));
 
         //Initialize the light sensor.
-        mLightIntensityManager = new LightIntensityManager(activity);
+        mLightIntensityManager = new LightIntensityManager(this, activity);
     }
 
     /**
