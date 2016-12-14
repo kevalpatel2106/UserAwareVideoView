@@ -16,7 +16,7 @@
 
 package com.kevalpatel.userawarevieoview;
 
-import android.app.Activity;
+import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -35,9 +35,9 @@ import static android.content.Context.SENSOR_SERVICE;
 
 class LightIntensityManager {
     //Minimum light intensity required to operate the eye detection.
-    private static final float LIGHT_INTENSITY_THRESHOLD = 6F;
+    private static final float LIGHT_INTENSITY_THRESHOLD = 1F;
 
-    private final UserAwareVideoView mActivity;
+    private final UserAwareVideoView mUserAwareVideoView;
 
     private final SensorManager mSensorManager;
     private final Sensor mLightSensor;
@@ -63,7 +63,7 @@ class LightIntensityManager {
                     @Override
                     public void onFinish() {
                         if (mLastIntensity < LIGHT_INTENSITY_THRESHOLD) {
-                            mActivity.onLowLight();
+                            mUserAwareVideoView.onLowLight();
                             isInLowLightCondition = true;
                         }
 
@@ -72,7 +72,7 @@ class LightIntensityManager {
                 };
                 mCountDownTimer.start();
             }else if (isInLowLightCondition){
-                mActivity.onEnoughLightAvailable();
+                mUserAwareVideoView.onEnoughLightAvailable();
             }
 
             Log.d("light sensor", mLastIntensity + "");
@@ -90,11 +90,11 @@ class LightIntensityManager {
      *
      * @param context instance of the caller.
      */
-    LightIntensityManager(@NonNull UserAwareVideoView context, Activity activity) {
-        mActivity = context;
+    LightIntensityManager(@NonNull UserAwareVideoView context, Context context1) {
+        mUserAwareVideoView = context;
 
         // Obtain references to the SensorManager and the Light Sensor
-        mSensorManager = (SensorManager) activity.getSystemService(SENSOR_SERVICE);
+        mSensorManager = (SensorManager) context1.getSystemService(SENSOR_SERVICE);
         mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
     }
 

@@ -18,9 +18,11 @@ package com.kevalpatel.userawarevieoview;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Path;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.Fragment;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,20 +84,11 @@ public class UserAwareVideoView extends VideoView {
      * @throws RuntimeException if the context is not the instance of the activity.
      */
     private void init(@NonNull Context context) {
-
-        //check if the context is of activity.
-        Activity activity;
-        if (context instanceof Activity) {
-            activity = (Activity) context;
-        } else {
-            throw new RuntimeException("Cannot initialize with other than Activity context.");
-        }
-
         //initialize the eye tracking
-        mFaceAnalyser = new FaceAnalyser(activity, this, addPreView(activity));
+        mFaceAnalyser = new FaceAnalyser(context, this, addPreView(context));
 
         //Initialize the light sensor.
-        mLightIntensityManager = new LightIntensityManager(this, activity);
+        mLightIntensityManager = new LightIntensityManager(this, context);
     }
 
     /**
@@ -116,35 +109,34 @@ public class UserAwareVideoView extends VideoView {
      *
      * @return {@link CameraSourcePreview}
      */
-    private CameraSourcePreview addPreView(@NonNull Activity activity) {
-
-        View rootView = ((ViewGroup) activity.getWindow().getDecorView().getRootView()).getChildAt(0);
+    private CameraSourcePreview addPreView(@NonNull Context activity) {
+//        View rootView = ((ViewGroup) getRootView()).getChildAt(0);
 
         //create fake camera view
         CameraSourcePreview cameraSourcePreview = new CameraSourcePreview(activity, this);
         cameraSourcePreview.setLayoutParams(new ViewGroup
                 .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        if (rootView instanceof LinearLayout) {
-            LinearLayout linearLayout = (LinearLayout) rootView;
+        LinearLayout linearLayout = new LinearLayout(activity);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(1, 1);
+        linearLayout.addView(cameraSourcePreview, params);
 
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(1, 1);
-            linearLayout.addView(cameraSourcePreview, params);
-        } else if (rootView instanceof RelativeLayout) {
-            RelativeLayout relativeLayout = (RelativeLayout) rootView;
-
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(1, 1);
-            params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-            relativeLayout.addView(cameraSourcePreview, params);
-        } else if (rootView instanceof FrameLayout) {
-            FrameLayout frameLayout = (FrameLayout) rootView;
-
-            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(1, 1);
-            frameLayout.addView(cameraSourcePreview, params);
-        } else {
-            throw new RuntimeException("Root view of the activity/fragment does not have supported view in parent.");
-        }
+//        if (rootView instanceof LinearLayout) {
+//        } else if (rootView instanceof RelativeLayout) {
+//            RelativeLayout relativeLayout = (RelativeLayout) rootView;
+//
+//            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(1, 1);
+//            params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+//            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+//            relativeLayout.addView(cameraSourcePreview, params);
+//        } else if (rootView instanceof FrameLayout) {
+//            FrameLayout frameLayout = (FrameLayout) rootView;
+//
+//            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(1, 1);
+//            frameLayout.addView(cameraSourcePreview, params);
+//        } else {
+//            throw new RuntimeException("Root view of the activity/fragment does not have supported view in parent.");
+//        }
 
         return cameraSourcePreview;
     }

@@ -19,6 +19,7 @@ package com.kevalpatel.userawarevieoview;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.support.v4.app.ActivityCompat;
@@ -51,16 +52,16 @@ class FaceAnalyser {
     private CameraSourcePreview mPreview;
 
     private boolean isTrackingRunning = false;                  //Bool to indicate is eye tracking is currently running or not?
-    private Activity mActivity;
+    private Context mContext;
 
     /**
      * Public constructor.
      *
-     * @param activity activity.
+     * @param context activity.
      */
-    FaceAnalyser(Activity activity, UserAwareVideoView userAwareVideoView, CameraSourcePreview preview) {
-        if (activity != null) {
-            mActivity = activity;
+    FaceAnalyser(Context context, UserAwareVideoView userAwareVideoView, CameraSourcePreview preview) {
+        if (context != null) {
+            mContext = context;
             mUserAwareVideoView = userAwareVideoView;
         } else {
             throw new RuntimeException("Cannot start without callback listener.");
@@ -88,7 +89,7 @@ class FaceAnalyser {
      * Create face decoder and camera source.
      */
     private void creteCameraTracker() {
-        mDetector = new FaceDetector.Builder(mActivity)
+        mDetector = new FaceDetector.Builder(mContext)
                 .setTrackingEnabled(false)
                 .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
                 .build();
@@ -100,9 +101,10 @@ class FaceAnalyser {
         if (!mDetector.isOperational()) {
             mUserAwareVideoView.onErrorOccurred();
             Log.e("Start Tracking", "Face tracker is not operational.");
+            return;
         }
 
-        mCameraSource = new CameraSource.Builder(mActivity, mDetector)
+        mCameraSource = new CameraSource.Builder(mContext, mDetector)
                 .setRequestedPreviewSize(640, 480)
                 .setFacing(CameraSource.CAMERA_FACING_FRONT)
                 .setRequestedFps(30.0f)
@@ -121,7 +123,7 @@ class FaceAnalyser {
         }
 
         //check for the camera permission
-        if (ActivityCompat.checkSelfPermission(mActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             mUserAwareVideoView.onCameraPermissionNotAvailable();
             Log.e("Start Tracking", "Camera permission not found.");
             return;
@@ -129,10 +131,12 @@ class FaceAnalyser {
 
         // check that the device has play services available.
         int statusCode = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(
-                mActivity.getApplicationContext());
+                mContext.getApplicationContext());
         if (statusCode != ConnectionResult.SUCCESS) {
-            Dialog dlg = GoogleApiAvailability.getInstance().getErrorDialog(mActivity, statusCode, RC_HANDLE_GMS);
-            dlg.show();
+            if (mContext instanceof Activity) {    //only if activity
+                Dialog dlg = GoogleApiAvailability.getInstance().getErrorDialog((Activity) mContext, statusCode, RC_HANDLE_GMS);
+                dlg.show();
+            }
             Log.e("Start Tracking", "Google Play Service not found.");
 
             mUserAwareVideoView.onErrorOccurred();
@@ -146,7 +150,7 @@ class FaceAnalyser {
             try {
                 mPreview.start(mCameraSource);
             } catch (IOException e) {
-                Log.d("startTracking",e.getMessage());
+                Log.d("startTracking", e.getMessage());
                 mUserAwareVideoView.onErrorOccurred();
                 mCameraSource.release();
                 mCameraSource = null;
@@ -191,7 +195,7 @@ class FaceAnalyser {
 
         @Override
         public void onNewItem(int faceId, Face item) {
-            Log.d("onNewItem","" + faceId);
+            Log.d("onNewItem", "" + faceId);
         }
 
         /**
@@ -218,7 +222,7 @@ class FaceAnalyser {
          */
         @Override
         public void onMissing(FaceDetector.Detections<Face> detectionResults) {
-            Log.d("onMissing","" );
+            Log.d("onMissing", "");
         }
 
         /**
@@ -238,7 +242,7 @@ class FaceAnalyser {
      */
     private boolean isFrontCameraAvailable() {
         int numCameras = Camera.getNumberOfCameras();
-        return numCameras > 0 && mActivity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
+        return numCameras > 0 && mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
     }
 
 }
