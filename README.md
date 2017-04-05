@@ -1,5 +1,4 @@
 # UserAwareVideoView
-[![Twitter](https://img.shields.io/badge/Twitter-@Kevalonly77-blue.svg?style=flat)](https://twitter.com/Kevalonly77)
 [![Build Status](https://travis-ci.org/kevalpatel2106/UserAwareVideoView.svg?branch=master)](https://travis-ci.org/kevalpatel2106/UserAwareVideoView) [ ![Download](https://api.bintray.com/packages/kevalpatel2106/maven/user-aware-videoview/images/download.svg) ](https://bintray.com/kevalpatel2106/maven/user-aware-videoview/_latestVersion) [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/kevalpatel2106/UserAwareVideoView) [![API](https://img.shields.io/badge/API-15%2B-orange.svg?style=flat)](https://android-arsenal.com/api?level=15)
 
 ## Featured in:
@@ -90,4 +89,4 @@ That's it. UserAwareVideoView is ready to use.
 3. Generate pull request. Mention all the required description regarding changes you made.
 
 ## Questions
-[@Kevalonly77](https://twitter.com/Kevalonly77)
+Hit me on twitter [![Twitter](https://img.shields.io/badge/Twitter-@kevalpatel2106-blue.svg?style=flat)](https://twitter.com/kevalpatel2106)
